@@ -8,7 +8,7 @@ public class DBMigration {
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         DBConnector connector = new DBConnector(vertx);
-        connector.query("CREATE TABLE IF NOT EXISTS service (id int auto_increment primary key, timestamp default CURRENT_TIMESTAMP, url VARCHAR(128) NOT NULL)")
+        connector.query("CREATE TABLE IF NOT EXISTS service (url VARCHAR(128) NOT NULL UNIQUE, status VARCHAR(128), timestamp default CURRENT_TIMESTAMP);")
                 .setHandler(done -> {
                     if (done.succeeded()) {
                         System.out.println("completed db migrations");

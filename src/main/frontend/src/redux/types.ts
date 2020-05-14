@@ -6,7 +6,7 @@ export enum ServiceStatus {
 
 export interface IStoreState {
   services: Array<{
-    name: string;
+    url: string;
     status: ServiceStatus;
   }>;
 }

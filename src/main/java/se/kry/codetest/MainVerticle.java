@@ -28,34 +28,38 @@ public class MainVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
 
-        vertx.setPeriodic(1000 * 30, timerId -> poller.updateServiceStatus(services));
+        vertx.setPeriodic(1000 * 30, timerId -> poller.updateServiceStatus(connector));
 
-        services.put("http://www.kry.se", ServiceStatus.UNKNOWN);
+        connector.createService("http://www.kry.se", ServiceStatus.UNKNOWN).setHandler((res) -> {
+            setRoutes(router);
 
-        setRoutes(router);
-
-        vertx.createHttpServer().requestHandler(router).listen(8080, result -> {
-            if (result.succeeded()) {
-                logger.log("KRY code test service started");
-                startFuture.complete();
-            } else {
-                startFuture.fail(result.cause());
-            }
+            vertx.createHttpServer().requestHandler(router).listen(8080, result -> {
+                if (result.succeeded()) {
+                    logger.log("KRY code test service started");
+                    startFuture.complete();
+                } else {
+                    startFuture.fail(result.cause());
+                }
+            });
         });
+
+
     }
 
     private void setRoutes(final Router router) {
         router.route("/*").handler(StaticHandler.create());
 
-        router.get("/service").handler(req -> {
-            final List<JsonObject> jsonServices = services.entrySet().stream()
-                    .map(service -> new JsonObject().put("name", service.getKey()).put("status", service.getValue()))
-                    .collect(Collectors.toList());
-            req.response().putHeader("content-type", "application/json").end(new JsonArray(jsonServices).encode());
-        });
+        router.get("/service").handler(req -> getAllServices(req));
         router.post("/service").handler(req -> createService(req));
         router.delete("/service").handler(req -> deleteService(req));
         router.put("/service").handler(req -> editService(req));
+    }
+
+
+    private void getAllServices(RoutingContext req) {
+        connector.getServices().setHandler((result) -> {
+            req.response().putHeader("content-type", "application/json").end(new JsonArray(result.result().getRows()).encode());
+        });
     }
 
     private void deleteService(RoutingContext req) {
@@ -75,7 +79,10 @@ public class MainVerticle extends AbstractVerticle {
 
     private void createService(RoutingContext req) {
         final JsonObject jsonBody = req.getBodyAsJson();
-        services.put(jsonBody.getString("url"), ServiceStatus.UNKNOWN);
-        req.response().putHeader("content-type", "text/plain").end("OK");
+        String serviceUrl = jsonBody.getString("url");
+        services.put(serviceUrl, ServiceStatus.UNKNOWN);
+        connector.createService(serviceUrl, ServiceStatus.UNKNOWN).setHandler(result -> {
+            req.response().putHeader("content-type", "text/plain").end("OK");
+        });
     }
 }

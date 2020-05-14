@@ -3,16 +3,22 @@ package se.kry.codetest;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
+
+import io.vertx.core.json.JsonObject;
 
 public class BackgroundPoller {
     private Logger logger = new Logger();
 
-    public void updateServiceStatus(Map<String, String> services) {
+    public void updateServiceStatus(DBConnector connector) {
         logger.log("POLLING...");
-        services.forEach((url, status) -> {
-            String serviceStatus = isReachable(url) ? ServiceStatus.OK : ServiceStatus.FAIL;
-            services.put(url, serviceStatus);
+        connector.getServices().setHandler((result) -> {
+            result.result().getRows().forEach((item) -> {
+                JsonObject service = item;
+                String url = item.getString("url");
+                String serviceStatus = isReachable(item.getString("url")) ? ServiceStatus.OK : ServiceStatus.FAIL;
+                connector.editService(url, serviceStatus);
+            });
+
         });
     }
 
@@ -23,9 +29,10 @@ public class BackgroundPoller {
             final URL u = new URL(url);
             connection = (HttpURLConnection) u.openConnection();
             connection.setRequestMethod("HEAD");
-            final int code = connection.getResponseCode();
+            connection.connect();
 
-            if (code == 200) {
+            final int code = connection.getResponseCode();
+            if (code < 400) {
                 return true;
             }
         } catch (final IOException e) {
