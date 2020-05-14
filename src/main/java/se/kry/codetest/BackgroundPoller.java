@@ -1,11 +1,8 @@
 package se.kry.codetest;
 
-import io.vertx.core.Future;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
 public class BackgroundPoller {

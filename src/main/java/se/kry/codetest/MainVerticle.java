@@ -30,7 +30,7 @@ public class MainVerticle extends AbstractVerticle {
 
         vertx.setPeriodic(1000 * 30, timerId -> poller.updateServiceStatus(services));
 
-        services.put("http://google.com", ServiceStatus.UNKNOWN);
+        services.put("http://www.kry.se", ServiceStatus.UNKNOWN);
 
         setRoutes(router);
 
