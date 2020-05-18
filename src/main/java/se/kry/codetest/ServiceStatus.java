@@ -1,7 +1,18 @@
 package se.kry.codetest;
 
-public class ServiceStatus {
-    public static final String UNKNOWN = "UNKNOWN";
-    public static final String FAIL = "FAIL";
-    public static final String OK = "OK";
+public enum ServiceStatus {
+    UNKNOWN("UNKNOWN"),
+    FAIL("FAIL"),
+    OK("OK");
+
+    private String status;
+
+    ServiceStatus(String serviceStatus) {
+        this.status = serviceStatus;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
 }

@@ -22,8 +22,8 @@ const ServiceList = () => {
 		<List relaxed divided>
 			{services.map((item) => {
 				return (
-					<List.Item key={item.name}>
-						<ServiceListItem name={item.name} status={item.status} />
+					<List.Item key={item.id}>
+						<ServiceListItem data={item} />
 					</List.Item>
 				);
 			})}

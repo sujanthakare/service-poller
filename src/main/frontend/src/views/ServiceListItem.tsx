@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ServiceStatus } from 'src/redux/types';
-import { SemanticCOLORS, Grid, Button } from 'semantic-ui-react';
-import ServiceListItemEditor from './ServiceListItemEditor';
+import { ServiceStatus, Service } from 'src/redux/types';
+import { SemanticCOLORS, Grid, Button, Header, Container, Icon } from 'semantic-ui-react';
+import EditServiceForm from './EditServiceForm';
 import { useServices } from 'src/redux/hooks';
 
 const statusColor: { [x: string]: SemanticCOLORS } = {
@@ -11,39 +11,28 @@ const statusColor: { [x: string]: SemanticCOLORS } = {
 };
 
 interface IProps {
-	name: string;
-	status: ServiceStatus;
+	data: Service;
 }
 
-const ServiceListItem = (props: IProps) => {
-	const { status, name } = props;
+const ServiceListItem = ({ data }: IProps) => {
+	const { id, status, name, url, createdAt } = data;
 
 	const { deleteService, loadServices } = useServices();
-	const [editMode, setEditMode] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const renderStatus = () => {
-		return <p style={{ textAlign: 'center' }}>{status}</p>;
+	const renderServiceInfo = () => {
+		return (
+			<Container style={{ flexDirection: 'row', display: 'flex', alignItems: 'center' }}>
+				<Icon size="large" name="circle" color={statusColor[status]} />
+				<Header style={{ marginLeft: 18 }}>
+					{name}
+					<Header.Subheader>{url}</Header.Subheader>
+					<Header.Subheader>{createdAt}</Header.Subheader>
+				</Header>
+			</Container>
+		);
 	};
 
-	const renderName = () => {
-		if (editMode) {
-			return (
-				<ServiceListItemEditor
-					name={name}
-					onCancel={() => {
-						setEditMode(false);
-					}}
-				/>
-			);
-		}
-
-		return <p>{name}</p>;
-	};
-
-	const onEditClick = () => {
-		setEditMode(true);
-	};
 	const onDeleteClick = async () => {
 		const result = window.confirm('Are you sure?');
 		if (!result) {
@@ -51,24 +40,21 @@ const ServiceListItem = (props: IProps) => {
 		}
 
 		setIsLoading(true);
-		await deleteService(name);
+		await deleteService(id);
 		setIsLoading(false);
 		await loadServices();
 	};
 
 	return (
 		<Grid verticalAlign="middle" columns="equal" padded stackable>
-			<Grid.Column color={statusColor[status]}>{renderStatus()}</Grid.Column>
-			<Grid.Column width="11">{renderName()}</Grid.Column>
+			<Grid.Column width="10">{renderServiceInfo()}</Grid.Column>
 			<Grid.Column>
-				<Button.Group>
-					<Button onClick={onEditClick} disabled={editMode || isLoading}>
-						Edit
-					</Button>
-					<Button onClick={onDeleteClick} disabled={isLoading}>
+				<Grid>
+					<EditServiceForm data={data} />
+					<Button color="red" onClick={onDeleteClick} disabled={isLoading}>
 						Delete
 					</Button>
-				</Button.Group>
+				</Grid>
 			</Grid.Column>
 		</Grid>
 	);

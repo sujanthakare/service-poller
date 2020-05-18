@@ -5,10 +5,20 @@ import se.kry.codetest.DBConnector;
 
 public class DBMigration {
 
+    private static String CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS " +
+            "service (" +
+            "id INT IDENTITY(1,1) PRIMARY KEY, " +
+            "name VARCHAR(128) NOT NULL, " +
+            "url VARCHAR(128) NOT NULL UNIQUE, " +
+            "status VARCHAR(128), " +
+            "createdAt default CURRENT_TIMESTAMP" +
+            ");";
+
+
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         DBConnector connector = new DBConnector(vertx);
-        connector.query("CREATE TABLE IF NOT EXISTS service (id int auto_increment primary key, timestamp default CURRENT_TIMESTAMP, url VARCHAR(128) NOT NULL)")
+        connector.query(CREATE_TABLE_QUERY)
                 .setHandler(done -> {
                     if (done.succeeded()) {
                         System.out.println("completed db migrations");

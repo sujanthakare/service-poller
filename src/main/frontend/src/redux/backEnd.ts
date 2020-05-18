@@ -1,42 +1,51 @@
+import { ServiceTransferObject } from './types';
+
 const headers = {
-  Accept: "application/json, text/plain, */*",
-  "Content-Type": "application/json",
+	Accept: 'application/json, text/plain, */*',
+	'Content-Type': 'application/json',
 };
 
-const deleteService = (url: string) => {
-  return fetch("/service", {
-    method: "delete",
-    headers,
-    body: JSON.stringify({ url }),
-  });
+const deleteService = async (id = '') => {
+	if (!id) {
+		return;
+	}
+
+	return await fetch(`/api/service/${id}`, {
+		method: 'delete',
+		headers,
+	});
 };
 
-const editService = (oldUrl: string, url: string) => {
-  return fetch("/service", {
-    method: "put",
-    headers,
-    body: JSON.stringify({ url, oldUrl }),
-  });
+const editService = async (id = '', serivce: ServiceTransferObject) => {
+	if (!id) {
+		return;
+	}
+
+	return await fetch(`/api/service/${id}`, {
+		method: 'put',
+		headers,
+		body: JSON.stringify(serivce),
+	});
 };
 
-const createService = (url: string) =>
-  fetch("/service", {
-    method: "post",
-    headers,
-    body: JSON.stringify({ url }),
-  });
+const createService = async (serivce: ServiceTransferObject) =>
+	await fetch('/api/service', {
+		method: 'post',
+		headers,
+		body: JSON.stringify(serivce),
+	});
 
 const getServices = async () => {
-  const res = await fetch("/service", {
-    method: "get",
-    headers,
-  });
-  return await res.json();
+	const res = await fetch('/api/service', {
+		method: 'get',
+		headers,
+	});
+	return await res.json();
 };
 
 export default {
-  deleteService,
-  editService,
-  createService,
-  getServices,
+	deleteService,
+	editService,
+	createService,
+	getServices,
 };
