@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ServiceStatus, Service } from 'src/redux/types';
-import { SemanticCOLORS, Grid, Button } from 'semantic-ui-react';
-import ServiceListItemEditor from './ServiceListItemEditor';
+import { SemanticCOLORS, Grid, Button, Header, Container, Icon } from 'semantic-ui-react';
+import EditServiceForm from './EditServiceForm';
 import { useServices } from 'src/redux/hooks';
 
 const statusColor: { [x: string]: SemanticCOLORS } = {
@@ -15,34 +15,24 @@ interface IProps {
 }
 
 const ServiceListItem = ({ data }: IProps) => {
-	const { id, status, name, url } = data;
+	const { id, status, name, url, createdAt } = data;
 
 	const { deleteService, loadServices } = useServices();
-	const [editMode, setEditMode] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const renderStatus = () => {
-		return <p style={{ textAlign: 'center' }}>{status}</p>;
+	const renderServiceInfo = () => {
+		return (
+			<Container style={{ flexDirection: 'row', display: 'flex', alignItems: 'center' }}>
+				<Icon size="large" name="circle" color={statusColor[status]} />
+				<Header style={{ marginLeft: 18 }}>
+					{name}
+					<Header.Subheader>{url}</Header.Subheader>
+					<Header.Subheader>{createdAt}</Header.Subheader>
+				</Header>
+			</Container>
+		);
 	};
 
-	const renderUrl = () => {
-		if (editMode) {
-			return (
-				<ServiceListItemEditor
-					data={data}
-					onCancel={() => {
-						setEditMode(false);
-					}}
-				/>
-			);
-		}
-
-		return <p>{url}</p>;
-	};
-
-	const onEditClick = () => {
-		setEditMode(true);
-	};
 	const onDeleteClick = async () => {
 		const result = window.confirm('Are you sure?');
 		if (!result) {
@@ -57,17 +47,14 @@ const ServiceListItem = ({ data }: IProps) => {
 
 	return (
 		<Grid verticalAlign="middle" columns="equal" padded stackable>
-			<Grid.Column color={statusColor[status]}>{renderStatus()}</Grid.Column>
-			<Grid.Column width="11">{renderUrl()}</Grid.Column>
+			<Grid.Column width="10">{renderServiceInfo()}</Grid.Column>
 			<Grid.Column>
-				<Button.Group>
-					<Button onClick={onEditClick} disabled={editMode || isLoading}>
-						Edit
-					</Button>
-					<Button onClick={onDeleteClick} disabled={isLoading}>
+				<Grid>
+					<EditServiceForm data={data} />
+					<Button color="red" onClick={onDeleteClick} disabled={isLoading}>
 						Delete
 					</Button>
-				</Button.Group>
+				</Grid>
 			</Grid.Column>
 		</Grid>
 	);
