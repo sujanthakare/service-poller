@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ServiceStatus } from 'src/redux/types';
+import { ServiceStatus, Service } from 'src/redux/types';
 import { SemanticCOLORS, Grid, Button } from 'semantic-ui-react';
 import ServiceListItemEditor from './ServiceListItemEditor';
 import { useServices } from 'src/redux/hooks';
@@ -11,12 +11,11 @@ const statusColor: { [x: string]: SemanticCOLORS } = {
 };
 
 interface IProps {
-	name: string;
-	status: ServiceStatus;
+	data: Service;
 }
 
-const ServiceListItem = (props: IProps) => {
-	const { status, name } = props;
+const ServiceListItem = ({ data }: IProps) => {
+	const { id, status, name, url } = data;
 
 	const { deleteService, loadServices } = useServices();
 	const [editMode, setEditMode] = useState(false);
@@ -26,11 +25,11 @@ const ServiceListItem = (props: IProps) => {
 		return <p style={{ textAlign: 'center' }}>{status}</p>;
 	};
 
-	const renderName = () => {
+	const renderUrl = () => {
 		if (editMode) {
 			return (
 				<ServiceListItemEditor
-					name={name}
+					data={data}
 					onCancel={() => {
 						setEditMode(false);
 					}}
@@ -38,7 +37,7 @@ const ServiceListItem = (props: IProps) => {
 			);
 		}
 
-		return <p>{name}</p>;
+		return <p>{url}</p>;
 	};
 
 	const onEditClick = () => {
@@ -51,7 +50,7 @@ const ServiceListItem = (props: IProps) => {
 		}
 
 		setIsLoading(true);
-		await deleteService(name);
+		await deleteService(id);
 		setIsLoading(false);
 		await loadServices();
 	};
@@ -59,7 +58,7 @@ const ServiceListItem = (props: IProps) => {
 	return (
 		<Grid verticalAlign="middle" columns="equal" padded stackable>
 			<Grid.Column color={statusColor[status]}>{renderStatus()}</Grid.Column>
-			<Grid.Column width="11">{renderName()}</Grid.Column>
+			<Grid.Column width="11">{renderUrl()}</Grid.Column>
 			<Grid.Column>
 				<Button.Group>
 					<Button onClick={onEditClick} disabled={editMode || isLoading}>

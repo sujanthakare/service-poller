@@ -12,7 +12,10 @@ const ServiceForm = () => {
 	const onSaveClick = async () => {
 		if (isUrlValid(inputValue)) {
 			setIsLoading(true);
-			await createService(inputValue);
+			await createService({
+				name: '',
+				url: inputValue,
+			});
 			await loadServices();
 			setInputValue('');
 			setIsLoading(false);

@@ -2,29 +2,35 @@ import React, { useState } from 'react';
 import { Input, Button, Popup } from 'semantic-ui-react';
 import { useServices } from 'src/redux/hooks';
 import { isUrlValid } from 'src/utils';
+import { Service } from 'src/redux/types';
 
 interface IProps {
-	name: string;
+	data: Service;
 	onCancel?: () => void;
 }
 
 const ServiceListItemEditor = (props: IProps) => {
-	const { name, onCancel } = props;
+	const { data, onCancel } = props;
+	const { id, name, url } = data;
 	const [error, setError] = useState('');
-	const [inputValue, setInputValue] = useState(name);
+	const [inputValue, setInputValue] = useState(url);
 	const [isLoading, setIsLoading] = useState(false);
 	const { loadServices, editService } = useServices();
 
 	const onSaveClick = async () => {
 		if (isUrlValid(inputValue)) {
 			setIsLoading(true);
-			await editService(name, inputValue);
+			await editService(id, {
+				url: inputValue,
+				name: '',
+			});
 			await loadServices();
 			setInputValue('');
 			setIsLoading(false);
 		} else {
 			setError('Invalid URL');
 		}
+		onCancel && onCancel();
 	};
 
 	return (
